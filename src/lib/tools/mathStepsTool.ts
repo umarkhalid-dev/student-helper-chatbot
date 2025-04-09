@@ -16,7 +16,7 @@ const MathStepsSchema = z
 
 const model = new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY || "",
-  model: "gemini-2.5-pro-exp-03-25",
+  model: "gemini-2.0-flash",
   maxOutputTokens: 2048,
   temperature: 0.7,
 });
