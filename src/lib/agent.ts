@@ -15,7 +15,10 @@ const containsKeyword = (message: string, keywords: string[]): boolean => {
 };
 
 function stripCodeFences(html: string): string {
-  return html.replace(/^```html\s*|\s*```$/g, "").trim();
+  return html
+    .replace(/^```html\s*/g, "")
+    .replace(/\s*```$/g, "")
+    .trim();
 }
 
 export async function processMessage(message: string) {
@@ -32,7 +35,6 @@ export async function processMessage(message: string) {
 
     const prompt = `Please answer the following question in HTML format which i can display in a div using dangerouslySetInnerHTML: ${message}`;
     const response = await model.invoke(prompt);
-    console.log("response => ", response.content);
 
     return {
       type: "text",

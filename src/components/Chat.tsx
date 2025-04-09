@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChatMessage } from "@/types/chat";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
@@ -7,6 +7,8 @@ import MessageInput from "./MessageInput";
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMessage = async (content: string) => {
     const userMessage: ChatMessage = { role: "user", content };
@@ -55,14 +57,21 @@ export default function Chat() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      window.scrollTo(0, 0);
     }
   };
+
+  // this is to scroll to the bottom of messages
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   return (
     <div className="flex flex-col h-[88vh] max-w-4xl mx-auto p-4">
       <div className="flex-1 overflow-y-auto mb-4 hide-scrollbar">
         <MessageList messages={messages} />
+        <div ref={chatEndRef} />
       </div>
       <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </div>
