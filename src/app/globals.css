@@ -22,3 +22,16 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.hide-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
