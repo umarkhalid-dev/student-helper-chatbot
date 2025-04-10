@@ -22,7 +22,10 @@ export default function Chat() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({
+          message: content,
+          history: messages,
+        }),
       });
 
       const data = await response.json();

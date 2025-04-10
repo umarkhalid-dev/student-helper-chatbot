@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { showMathStepsTool } from "./tools/mathStepsTool";
 import { askQuizQuestionTool } from "./tools/quizQuestionTool";
 import { generalInfo } from "./tools/generalTool";
+import { ChatMessage } from "@/types/chat";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
 
@@ -53,11 +54,24 @@ const generalInfoFunctionDeclaration = {
   },
 };
 
-export async function processMessage(message: string) {
+export async function processMessage(
+  message: string,
+  history: ChatMessage[] = []
+) {
   try {
+    const formattedHistory = history
+      .map(
+        (msg) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`
+      )
+      .join("\n");
+
+    const promptWithHistory = formattedHistory
+      ? `Previous conversation:\n${formattedHistory}\n\nCurrent message: ${message}`
+      : message;
+
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: message,
+      contents: promptWithHistory,
       config: {
         tools: [
           {
