@@ -70,7 +70,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-[88vh] max-w-4xl mx-auto p-4">
       <div className="flex-1 overflow-y-auto mb-4 hide-scrollbar">
-        <MessageList messages={messages} />
+        <MessageList messages={messages} isLoading={isLoading} />
         <div ref={chatEndRef} />
       </div>
       <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
