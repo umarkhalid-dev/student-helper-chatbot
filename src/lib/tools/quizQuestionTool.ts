@@ -1,32 +1,52 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { z } from "zod";
+import { GoogleGenAI } from "@google/genai";
 
-const QuizQuestionSchema = z
-  .object({
-    type: z.enum(["quiz"]),
-    question: z.string(),
-    choices: z.array(z.string()).length(4),
-    correctAnswer: z.number().int().min(0).max(3),
-  })
-  .describe("Multiple-choice quiz question with four options");
-
-const model = new ChatGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_API_KEY || "",
-  model: "gemini-2.0-flash",
-  maxOutputTokens: 2048,
-  temperature: 0.7,
-});
-
-const structuredModel = model.withStructuredOutput(QuizQuestionSchema, {
-  name: "QuizQuestion",
-});
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
 
 export const askQuizQuestionTool = async (input: { topic: string }) => {
   const { topic } = input;
 
   try {
-    const prompt = `Generate a multiple-choice questions about the topic: ${topic}.`;
-    const result = await structuredModel.invoke(prompt);
+    const prompt = `
+      Generate a multiple-choice question about the topic: ${topic}
+      Return a JSON object with the following structure:
+      {
+        "type": "quiz",
+        "question": string,
+        "choices": string[] (exactly 4 choices),
+        "correctAnswer": number (0-3, representing the index of the correct answer)
+      }
+    `;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+
+    const responseText = response.text || "";
+    let result;
+
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[0]);
+      } else {
+        return {
+          type: "text",
+          content:
+            "I couldn't parse the quiz question. Here's the raw response: " +
+            responseText,
+        };
+      }
+    } catch (error) {
+      console.error("Error parsing quiz question:", error);
+      return {
+        type: "text",
+        content:
+          "I encountered an error parsing the quiz question. Here's the raw response: " +
+          responseText,
+      };
+    }
+
     return result;
   } catch (error) {
     console.error("Error in askQuizQuestionTool:", error);
